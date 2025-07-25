@@ -24,53 +24,37 @@ export class QuizController {
       }
 
       //request la ollama cu intrebarile
-      const ollamaResponse = await axios.post(
+      const response = await axios.post(
         'http://ollama.vsp.dev/api/generate',
         {
           model: 'llama3.1:latest',
           prompt: prompt,
-          stream: true
+          stream: false
         },
-        { responseType: 'stream',
+        {
           headers: {
             Authorization: `Bearer ${process.env.OLLAMA_API_KEY}`
         }
          }
       );
-      //asta ii textu full de la ollama
-      let promptResponse = '';
 
-      //aici se umple/completeaza textu full de la ollama (care vine in bucati)
-      ollamaResponse.data.on('data', (chunk) => {
-        const lines = chunk.toString().split('\n').filter(Boolean);
-        for (const line of lines) {
-          try {
-            const parsed = JSON.parse(line);
-            if (parsed.response) promptResponse += parsed.response;
-          } catch (err) {
-            console.error('JSON parse failed:', err);
-          }
-        }
+      const quizResponse = response.data.response;
+
+      let quizJSON;
+
+      try {
+        quizJSON = JSON.parse(quizResponse);
+      } catch (err) {
+        quizJSON = quizResponse.toString();
+      }
+
+      res.status(200).json({
+        quiz: quizJSON,
+        type: type
       });
-      //convert fulltext in json 
 
-      ollamaResponse.data.on('end', () => {
-
-        let quiz;
-
-        try {
-          quiz = JSON.parse(promptResponse);
-        } catch (err) {
-          quiz = promptResponse.toString()
-        }
-
-        res.status(200).json({
-          quiz: quiz,
-          type: type
-        });
-      });
-      //alte erori
     } catch (err) {
+      //alte erori
       res.status(500).json({ error: 'Internal server error', details: err.message });
     }
   }
