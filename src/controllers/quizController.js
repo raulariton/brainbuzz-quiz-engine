@@ -1,26 +1,27 @@
 import axios from 'axios'; //pentru ollama
 import fs from 'fs/promises'; //pentru json
+import prompts from '../../prompts.json' with { type: 'json' };
+
+const ACCEPTED_QUIZ_TYPES = ['historical', 'funny', 'photo', 'caption', 'emoji_puzzle'];
 
 export class QuizController {
   static async handleQuizRequest(req, res) {
     const type = req.query.type;
+
     if (!type) return res.status(400).json({ error: 'Missing quiz type' });
 
+    if (!ACCEPTED_QUIZ_TYPES.includes(type)) {
+      return res.status(400).json({ error: 'Invalid quiz type' });
+    }
+
     try { //luam tipul din prompts.json
-      const promptsData = await fs.readFile('../prompts.json', 'utf-8');
-      const prompts = JSON.parse(promptsData);
       let prompt = prompts[type];
-      
-      //verificam daca exista un prompt pentru tipul cerut
-      if (!prompt) return res.status(400).json({ error: 'Invalid quiz type' });
       
       //asta ii pentru ca la historical trebuie sa schimbam data
       if (type === 'historical') {
         const currentDate = new Date().toISOString().split('T')[0];
         prompt = prompt.replace('{{currentDate}}', currentDate);
       }
-      //debug sa vad daca vede cheia
-      console.log('OLLAMA_API_KEY:', process.env.OLLAMA_API_KEY);
 
       //request la ollama cu intrebarile
       const ollamaResponse = await axios.post(
@@ -32,12 +33,12 @@ export class QuizController {
         },
         { responseType: 'stream',
           headers: {
-            Authorization: process.env.OLLAMA_API_KEY
+            Authorization: `Bearer ${process.env.OLLAMA_API_KEY}`
         }
          }
       );
       //asta ii textu full de la ollama
-      let fullText = '';
+      let promptResponse = '';
 
       //aici se umple/completeaza textu full de la ollama (care vine in bucati)
       ollamaResponse.data.on('data', (chunk) => {
@@ -45,7 +46,7 @@ export class QuizController {
         for (const line of lines) {
           try {
             const parsed = JSON.parse(line);
-            if (parsed.response) fullText += parsed.response;
+            if (parsed.response) promptResponse += parsed.response;
           } catch (err) {
             console.error('JSON parse failed:', err);
           }
@@ -54,12 +55,10 @@ export class QuizController {
       //convert fulltext in json 
       //! nu merge cu promptul curent !
       ollamaResponse.data.on('end', () => {
-        try {
-          const quiz = JSON.parse(fullText);
-          res.json(quiz);
-        } catch (err) {
-          res.status(500).json({ error: 'Failed to parse JSON', raw: fullText });
-        }
+        res.status(200).json({
+          quiz: promptResponse,
+          type: type
+        });
       });
       //alte erori
     } catch (err) {
