@@ -1,6 +1,7 @@
 import axios from 'axios'; //pentru ollama
 import quizTypes from '../quizTypes.js';
 import { storeQuiz } from '../services/dbServices.js';
+import moment from 'moment';
 
 const ACCEPTED_QUIZ_TYPES = ['historical', 'icebreaker', 'movie_quote'];
 
@@ -21,7 +22,7 @@ export class QuizController {
       // if the type is 'historical',
       // replace the {{currentDate}} placeholder with the current date
       if (type === 'historical') {
-        const currentDate = new Date().toISOString().split('T')[0];
+        const currentDate = moment().format('LL')
         prompt = prompt.replace('{{currentDate}}', currentDate);
       }
 
@@ -53,11 +54,17 @@ export class QuizController {
         quizJSON = quizResponse.toString();
       }
 
-      // store quiz in database
       const quizContent = {
         type: type,
-        content: quiz
+        content: quizJSON
       };
+
+      // store quiz in database
+      try {
+        await storeQuiz(quizJSON)
+      } catch (error) {
+        return res.status(500).json({ error: error.message })
+      }
 
       res.status(200).json({
         quiz: quizJSON,
