@@ -1,0 +1,5 @@
+{
+  "historical": "Today is {{CURRENT_DATE}}. Generate a multiple choice trivia question about a significant historical event that happened on this day in the past. Format your response as: { \"quizText\": \"...\", \"options\": [\"...\", \"...\", \"...\", \"...\"], \"correctAnswer\": \"...\" }",
+  "icebreaker": "Create a light-hearted multiple choice icebreaker question for a workplace Slack bot. It should be fun, like 'Never have I ever' or 'Who is most likely to...'. Format the response as: { \"quizText\": \"...\", \"options\": [\"...\", \"...\", \"...\", \"...\"], \"correctAnswer\": \"...\" }",
+  "movie_quote": "Choose a famous movie or TV quote. Ask who said it and in which film or show. Provide 4 answer choices, and clearly mark the correct one. Respond in this format: { \"quizText\": \"...\", \"options\": [\"...\", \"...\", \"...\", \"...\"], \"correctAnswer\": \"...\" }"
+}
