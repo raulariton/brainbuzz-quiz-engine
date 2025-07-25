@@ -31,10 +31,9 @@ export class QuizController {
         {
           model: 'llama3.1:latest',
           prompt: prompt,
-          stream: true
+          stream: false
         },
         {
-          responseType: 'stream',
           headers: {
             Authorization: `Bearer ${process.env.OLLAMA_API_KEY}`
           }
@@ -44,46 +43,27 @@ export class QuizController {
       // empty string to store the full response
       let promptResponse = '';
 
-      // get stream data from ollama response
-      ollamaResponse.data.on('data', (chunk) => {
-        const lines = chunk.toString().split('\n').filter(Boolean);
-        for (const line of lines) {
-          try {
-            const parsed = JSON.parse(line);
-            if (parsed.response) promptResponse += parsed.response;
-          } catch (err) {
-            console.error('JSON parse failed:', err);
-          }
-        }
+      const quizResponse = response.data.response;
+
+      let quizJSON;
+
+      try {
+        quizJSON = JSON.parse(quizResponse);
+      } catch (err) {
+        quizJSON = quizResponse.toString();
+      }
+
+      // store quiz in database
+      const quizContent = {
+        type: type,
+        content: quiz
+      };
+
+      res.status(200).json({
+        quiz: quizJSON,
+        type: type
       });
 
-      // convert fulltext in json
-      ollamaResponse.data.on('end', async () => {
-        let quiz;
-
-        try {
-          quiz = JSON.parse(promptResponse);
-        } catch (err) {
-          quiz = promptResponse.toString();
-        }
-
-        // store quiz in database
-        const quizContent = {
-          type: type,
-          content: quiz
-        };
-
-        try {
-          await storeQuiz(quizContent);
-        } catch (error) {
-          return res.status(500).json({ error: error.message });
-        }
-
-        res.status(200).json({
-          quiz: quiz,
-          type: type
-        });
-      });
     } catch (err) {
       // other errors
       res.status(500).json({ error: 'Internal server error', details: err.message });
