@@ -1,6 +1,5 @@
 import axios from 'axios'; //pentru ollama
-import fs from 'fs/promises'; //pentru json
-import prompts from '../../prompts.js';
+import quizTypes from '../../quizTypes.js';
 
 const ACCEPTED_QUIZ_TYPES = ['historical', 'funny', 'photo', 'caption', 'emoji_puzzle'];
 
@@ -14,8 +13,8 @@ export class QuizController {
       return res.status(400).json({ error: 'Invalid quiz type' });
     }
 
-    try { //luam tipul din prompts.js
-      let prompt = prompts[type];
+    try { //luam tipul din quizTypes.js
+      let prompt = quizTypes[type];
       
       //asta ii pentru ca la historical trebuie sa schimbam data
       if (type === 'historical') {
