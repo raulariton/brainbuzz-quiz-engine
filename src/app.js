@@ -4,7 +4,7 @@ import dotenv from 'dotenv';
 import { QuizController } from './controllers/quizController.js';
 
 //codu asta exista pentru a incarca variabilele din fisierul .env din root folder
-dotenv.config({ path: '../.env' });
+dotenv.config();
 
 const app = express();
 const port = 3000;
