@@ -1,6 +1,6 @@
 import axios from 'axios'; //pentru ollama
 import fs from 'fs/promises'; //pentru json
-import prompts from '../../prompts.json' with { type: 'json' };
+import prompts from '../../prompts.js';
 
 const ACCEPTED_QUIZ_TYPES = ['historical', 'funny', 'photo', 'caption', 'emoji_puzzle'];
 
@@ -14,7 +14,7 @@ export class QuizController {
       return res.status(400).json({ error: 'Invalid quiz type' });
     }
 
-    try { //luam tipul din prompts.json
+    try { //luam tipul din prompts.js
       let prompt = prompts[type];
       
       //asta ii pentru ca la historical trebuie sa schimbam data
@@ -53,10 +53,19 @@ export class QuizController {
         }
       });
       //convert fulltext in json 
-      //! nu merge cu promptul curent !
+
       ollamaResponse.data.on('end', () => {
+
+        let quiz;
+
+        try {
+          quiz = JSON.parse(promptResponse);
+        } catch (err) {
+          quiz = promptResponse.toString()
+        }
+
         res.status(200).json({
-          quiz: promptResponse,
+          quiz: quiz,
           type: type
         });
       });
@@ -66,3 +75,4 @@ export class QuizController {
     }
   }
 }
+
