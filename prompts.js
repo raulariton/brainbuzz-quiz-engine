@@ -1,7 +1,6 @@
 const prompts = {
   "historical":
-    `
-    Generate a historical quiz question for the current date, given {{currentDate}}. 
+    `Generate a historical quiz question for the current date ({{currentDate}}). 
     The quiz should be in the following format:
     { 
       "options": ["(Option 1)", "(Option 2)", "(Option 3)", "(Option 4)"],
@@ -13,8 +12,7 @@ const prompts = {
     - The correct answer must be an event that strictly corresponds to the date.
     - Fact-check the events to ensure accuracy.
     - Respect the JSON format strictly. Do not include any additional text or explanations.
-    - An example for an option is "[SHORT EVENT DESCRIPTION], [YEAR]". Follow this format for all options.
-    `,
+    - An example for an option is "[SHORT EVENT DESCRIPTION], [YEAR]". Follow this format for all options.`,
   "emoji": "Generate a fun emoji-based quiz about movies."
 }
 

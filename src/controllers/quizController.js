@@ -1,6 +1,7 @@
 import axios from 'axios'; //pentru ollama
 import fs from 'fs/promises'; //pentru json
 import prompts from '../../prompts.js';
+import moment from 'moment';
 
 const ACCEPTED_QUIZ_TYPES = ['historical', 'funny', 'photo', 'caption', 'emoji_puzzle'];
 
@@ -19,7 +20,7 @@ export class QuizController {
       
       //asta ii pentru ca la historical trebuie sa schimbam data
       if (type === 'historical') {
-        const currentDate = new Date().toISOString().split('T')[0];
+        const currentDate = moment().format('LL')
         prompt = prompt.replace('{{currentDate}}', currentDate);
       }
 
