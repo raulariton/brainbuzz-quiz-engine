@@ -14,7 +14,7 @@ export class QuizController {
     }
 
     try { //luam tipul din quizTypes.js
-      let prompt = quizTypes[type];
+      let prompt = quizTypes[type].prompt;
       
       //asta ii pentru ca la historical trebuie sa schimbam data
       if (type === 'historical') {
