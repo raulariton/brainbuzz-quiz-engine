@@ -16,10 +16,6 @@ const quizTypes = {
     - An example for an option is "[SHORT EVENT DESCRIPTION], [YEAR]". Follow this format for all options.`,
   },
 
-  emoji: {
-    prompt: `Generate a fun emoji-based quiz about movies.`
-  },
-
   icebreaker: {
     prompt: `Create a light-hearted multiple choice icebreaker question for a workplace Slack bot. It should be fun, like 'Never have I ever' or 'Who is most likely to...'. Format the response as: { "quizText": "...", "options": ["...", "...", "...", "..."], "correctAnswer": "..." }`,
   },
