@@ -1,7 +1,7 @@
 import axios from 'axios'; //pentru ollama
-import quizTypes from '../../quizTypes.js';
+import quizTypes from '../quizTypes.js';
 
-const ACCEPTED_QUIZ_TYPES = ['historical', 'funny', 'photo', 'caption', 'emoji_puzzle'];
+const ACCEPTED_QUIZ_TYPES = ['historical', 'icebreaker', 'movie_quote'];
 
 export class QuizController {
   static async handleQuizRequest(req, res) {
@@ -15,7 +15,7 @@ export class QuizController {
 
     try { //luam tipul din quizTypes.js
       let prompt = quizTypes[type].prompt;
-      
+
       //asta ii pentru ca la historical trebuie sa schimbam data
       if (type === 'historical') {
         const currentDate = new Date().toISOString().split('T')[0];
@@ -30,11 +30,12 @@ export class QuizController {
           prompt: prompt,
           stream: true
         },
-        { responseType: 'stream',
+        {
+          responseType: 'stream',
           headers: {
             Authorization: `Bearer ${process.env.OLLAMA_API_KEY}`
+          }
         }
-         }
       );
       //asta ii textu full de la ollama
       let promptResponse = '';
