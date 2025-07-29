@@ -28,6 +28,9 @@ This repository hosts the quiz engine (backend) for the BrainBuzz bot.
 - See the `.env.example` file for the keys you will need.
     - `OLLAMA_URL`: The URL of the Ollama server used to make requests to the LLM.
     - `OLLAMA_API_KEY`: The API key for the Ollama server, if required.
+    - `SUPABASE_URL`: The URL of the Supabase instance used to store quiz data. 
+      You can get this URL from the Supabase Dashboard > Connect > App Frameworks > Framework: refine, Using: Supabase-js.
+    - `SUPABASE_KEY`: Is obtained in the same way as `SUPABASE_URL`.
     - Paste the keys as they are, without any quotation marks (format example `OLLAMA_URL=http://localhost:9999`).
 
 5. Start the Express server
