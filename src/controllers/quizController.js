@@ -1,5 +1,6 @@
 import axios from 'axios'; //pentru ollama
 import quizTypes from '../quizTypes.js';
+import { storeQuiz } from '../services/dbServices.js';
 
 const ACCEPTED_QUIZ_TYPES = ['historical', 'icebreaker', 'movie_quote'];
 
@@ -13,16 +14,18 @@ export class QuizController {
       return res.status(400).json({ error: 'Invalid quiz type' });
     }
 
-    try { //luam tipul din quizTypes.js
+    try {
+      // get prompt from quizTypes based on type
       let prompt = quizTypes[type].prompt;
 
-      //asta ii pentru ca la historical trebuie sa schimbam data
+      // if the type is 'historical',
+      // replace the {{currentDate}} placeholder with the current date
       if (type === 'historical') {
         const currentDate = new Date().toISOString().split('T')[0];
         prompt = prompt.replace('{{currentDate}}', currentDate);
       }
 
-      //request la ollama cu intrebarile
+      // ollama request with the requested prompt
       const ollamaResponse = await axios.post(
         'http://ollama.vsp.dev/api/generate',
         {
@@ -37,10 +40,11 @@ export class QuizController {
           }
         }
       );
-      //asta ii textu full de la ollama
+
+      // empty string to store the full response
       let promptResponse = '';
 
-      //aici se umple/completeaza textu full de la ollama (care vine in bucati)
+      // get stream data from ollama response
       ollamaResponse.data.on('data', (chunk) => {
         const lines = chunk.toString().split('\n').filter(Boolean);
         for (const line of lines) {
@@ -52,16 +56,27 @@ export class QuizController {
           }
         }
       });
-      //convert fulltext in json 
 
-      ollamaResponse.data.on('end', () => {
-
+      // convert fulltext in json
+      ollamaResponse.data.on('end', async () => {
         let quiz;
 
         try {
           quiz = JSON.parse(promptResponse);
         } catch (err) {
-          quiz = promptResponse.toString()
+          quiz = promptResponse.toString();
+        }
+
+        // store quiz in database
+        const quizContent = {
+          type: type,
+          content: quiz
+        };
+
+        try {
+          await storeQuiz(quizContent);
+        } catch (error) {
+          return res.status(500).json({ error: error.message });
         }
 
         res.status(200).json({
@@ -69,10 +84,9 @@ export class QuizController {
           type: type
         });
       });
-      //alte erori
     } catch (err) {
+      // other errors
       res.status(500).json({ error: 'Internal server error', details: err.message });
     }
   }
 }
-
