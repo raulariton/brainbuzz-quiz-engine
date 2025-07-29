@@ -44,7 +44,7 @@ export class QuizController {
       // empty string to store the full response
       let promptResponse = '';
 
-      const quizResponse = response.data.response;
+      const quizResponse = ollamaResponse.data.response;
 
       let quizJSON;
 
@@ -61,7 +61,7 @@ export class QuizController {
 
       // store quiz in database
       try {
-        await storeQuiz(quizJSON)
+        await storeQuiz(quizContent);
       } catch (error) {
         return res.status(500).json({ error: error.message })
       }
