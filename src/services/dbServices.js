@@ -17,6 +17,8 @@ export const storeQuiz = async (quiz) => {
 };
 
 export const storeUserAnswer = async ({ user_id, quiz_id, correct }) => {
+  // TODO: modify method to also store completion date
+  //  (also modify schema in supabase)
   try {
     const { error } = await supabaseClient
       .from('user_answers')
@@ -34,3 +36,24 @@ export const storeUserAnswer = async ({ user_id, quiz_id, correct }) => {
     throw err;
   }
 };
+
+export const getQuizCorrectCompletions = async (quiz_id) => {
+  // TODO: also select completion date (supabase table needs to be modified)
+  try {
+    const { data, error } = await supabaseClient
+      .from('user_answers')
+      .select('user_id, correct')
+      .eq('quiz_id', quiz_id)
+      .eq('correct', true);
+
+    if (error) {
+      throw new Error(error.message);
+    }
+
+    return data;
+
+  } catch (error) {
+    console.error('Error getting quiz completions from DB: ', error);
+    throw new Error('Failed to get quiz completions.');
+  }
+}
