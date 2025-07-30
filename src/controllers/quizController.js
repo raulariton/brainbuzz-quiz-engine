@@ -52,7 +52,7 @@ export class QuizController {
             const parsed = JSON.parse(line);
             if (parsed.response) promptResponse += parsed.response;
           } catch (err) {
-            console.error('JSON parse failed:', err);
+            //console.error('JSON parse failed:', err);
           }
         }
       });
@@ -60,30 +60,33 @@ export class QuizController {
       // convert fulltext in json
       ollamaResponse.data.on('end', async () => {
         let quiz;
-
         try {
-          quiz = JSON.parse(promptResponse);
-        } catch (err) {
-          quiz = promptResponse.toString();
-        }
 
-        // store quiz in database
-        const quizContent = {
-          type: type,
-          content: quiz
-        };
+          const match = promptResponse.match(/\{\s*"quizText"\s*:\s*".+?",\s*"options"\s*:\s*\[.*?\],\s*"(answer|correctAnswer)"\s*:\s*".*?"\s*\}/s);
 
-        try {
-          await storeQuiz(quizContent);
+          if (!match) {
+            console.error("❌ Nu am găsit niciun quiz JSON valid în răspunsul LLM:");
+            console.error(promptResponse);
+            return res.status(500).json({ error: "No valid quiz JSON found." });
+          }
+
+          quiz = JSON.parse(match[0]);
+
+
+          if (quiz.correctAnswer && !quiz.answer) {
+            quiz.answer = quiz.correctAnswer;
+            delete quiz.correctAnswer;
+          }
+
+          res.json(quiz);
         } catch (error) {
-          return res.status(500).json({ error: error.message });
+          console.error("❌ Eroare la parsarea quiz-ului:", error);
+          console.error("Prompt response complet:", promptResponse);
+          res.status(500).json({ error: "Failed to parse quiz" });
         }
-
-        res.status(200).json({
-          quiz: quiz,
-          type: type
-        });
       });
+
+
     } catch (err) {
       // other errors
       res.status(500).json({ error: 'Internal server error', details: err.message });

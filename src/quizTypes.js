@@ -21,8 +21,31 @@ const quizTypes = {
   },
 
   movie_quote: {
-    prompt: `Choose a famous movie or TV quote. Ask who said it and in which film or show. Provide 4 answer choices, and clearly mark the correct one. Respond in this format: { "quizText": "...", "options": ["...", "...", "...", "..."], "correctAnswer": "..." }`,
-  },
+    prompt: `
+Create a movie quote quiz question in strict JSON format. Structure it like this:
+
+{
+  "quizText": "Who said the following quote, and in what movie? \\"You're gonna need a bigger boat\\"",
+  "options": [
+    "Roy Scheider in Jaws",
+    "Harrison Ford in Star Wars",
+    "Tom Hanks in Cast Away",
+    "Robert Shaw in Jaws"
+  ],
+  "answer": "Robert Shaw in Jaws"
+}
+
+ Important:
+- Only respond with a **single JSON object** (no extra text, no explanation).
+- Keys must be: "quizText", "options", "answer"
+- Use **double quotes** for all strings.
+- Escape any internal quotes correctly.
+- Do NOT include headings like "Quote:", "Options:", "Correct answer:" — only the JSON.
+- The quiz should focus on famous quotes and correct attribution (actor + movie).
+`
+  }
+
+
 };
 
 export default quizTypes;
