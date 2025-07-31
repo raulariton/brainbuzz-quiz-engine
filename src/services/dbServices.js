@@ -4,17 +4,19 @@ export const storeQuiz = async (quiz) => {
   try {
     const { error } = await supabaseClient
       .from('quizzes')
-      .insert({ quiz });
+      .insert([ { quiz } ]);
 
     if (error) {
       throw new Error(error.message);
     }
 
+    console.log('✅ Quiz salvat cu succes în Supabase!');
   } catch (error) {
-    console.error('Error storing quiz in DB: ', error);
+    console.error('❌ Error storing quiz in DB: ', error);
     throw new Error('Failed to store quiz in database.');
   }
 };
+
 
 export const storeUserAnswer = async ({ user_id, quiz_id, correct }) => {
   // TODO: modify method to also store completion date
