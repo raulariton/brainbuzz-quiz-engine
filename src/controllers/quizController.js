@@ -78,6 +78,8 @@ export class QuizController {
             delete quiz.correctAnswer;
           }
 
+          await storeQuiz({ type, content: quiz });
+
           res.json(quiz);
         } catch (error) {
           console.error("❌ Eroare la parsarea quiz-ului:", error);
