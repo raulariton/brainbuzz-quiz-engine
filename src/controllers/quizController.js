@@ -85,25 +85,21 @@ export class QuizController {
             delete quiz.correctAnswer;
           }
 
-          // store the quiz in the database
-          try {
-            await storeQuiz({
-              type: type,
-              content: quiz
-            })
-          } catch (error) {
-            console.error("❌ Eroare la stocarea quiz-ului în baza de date:", error);
-            return res.status(500).json({ error: "Failed to store quiz in database" });
-          }
+        const quizId = await storeQuiz({ type, content: quiz });
 
-          res.json(quiz);
-
-        } catch (error) {
-          console.error("❌ Eroare la parsarea quiz-ului:", error);
-          console.error("Prompt response complet:", promptResponse);
-          res.status(500).json({ error: "Failed to parse quiz" });
-        }
-      });
+        // Trimit quiz-ul împreună cu id-ul către Slackbot
+        res.json({
+          quiz_id: quizId,
+          quizText: quiz.quizText,
+          options: quiz.options,
+          answer: quiz.answer
+        });
+      } catch (error) {
+        console.error("❌ Eroare la parsarea quiz-ului:", error);
+        console.error("Prompt response complet:", promptResponse);
+        res.status(500).json({ error: "Failed to parse quiz" });
+      }
+    });
 
 
     } catch (err) {
