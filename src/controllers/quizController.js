@@ -58,35 +58,40 @@ export class QuizController {
       });
 
       // convert fulltext in json
-      ollamaResponse.data.on('end', async () => {
-        let quiz;
-        try {
+          ollamaResponse.data.on('end', async () => {
+      let quiz;
+      try {
+        const match = promptResponse.match(/\{\s*"quizText"\s*:\s*".+?",\s*"options"\s*:\s*\[.*?\],\s*"(answer|correctAnswer)"\s*:\s*".*?"\s*\}/s);
 
-          const match = promptResponse.match(/\{\s*"quizText"\s*:\s*".+?",\s*"options"\s*:\s*\[.*?\],\s*"(answer|correctAnswer)"\s*:\s*".*?"\s*\}/s);
-
-          if (!match) {
-            console.error("❌ Nu am găsit niciun quiz JSON valid în răspunsul LLM:");
-            console.error(promptResponse);
-            return res.status(500).json({ error: "No valid quiz JSON found." });
-          }
-
-          quiz = JSON.parse(match[0]);
-
-
-          if (quiz.correctAnswer && !quiz.answer) {
-            quiz.answer = quiz.correctAnswer;
-            delete quiz.correctAnswer;
-          }
-
-          await storeQuiz({ type, content: quiz });
-
-          res.json(quiz);
-        } catch (error) {
-          console.error("❌ Eroare la parsarea quiz-ului:", error);
-          console.error("Prompt response complet:", promptResponse);
-          res.status(500).json({ error: "Failed to parse quiz" });
+        if (!match) {
+          console.error("❌ Nu am găsit niciun quiz JSON valid în răspunsul LLM:");
+          console.error(promptResponse);
+          return res.status(500).json({ error: "No valid quiz JSON found." });
         }
-      });
+
+        quiz = JSON.parse(match[0]);
+
+        if (quiz.correctAnswer && !quiz.answer) {
+          quiz.answer = quiz.correctAnswer;
+          delete quiz.correctAnswer;
+        }
+
+        const quizId = await storeQuiz({ type, content: quiz });
+
+        // Trimit quiz-ul împreună cu id-ul către Slackbot
+        res.json({
+          quiz_id: quizId,
+          quizText: quiz.quizText,
+          options: quiz.options,
+          answer: quiz.answer
+        });
+      } catch (error) {
+        console.error("❌ Eroare la parsarea quiz-ului:", error);
+        console.error("Prompt response complet:", promptResponse);
+        res.status(500).json({ error: "Failed to parse quiz" });
+      }
+    });
+
 
 
     } catch (err) {

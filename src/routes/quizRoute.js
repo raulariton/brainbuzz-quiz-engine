@@ -3,7 +3,7 @@ import { QuizController } from '../controllers/quizController.js';
 
 const router = Router();
 
-// GET /quiz
+// GET /quiz → returnează quiz + quiz_id
 router.get('/', QuizController.handleQuizRequest);
 
 export default router;
