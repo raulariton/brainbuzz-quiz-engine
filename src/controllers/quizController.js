@@ -67,18 +67,37 @@ export class QuizController {
           if (!match) {
             console.error("❌ Nu am găsit niciun quiz JSON valid în răspunsul LLM:");
             console.error(promptResponse);
+
+            // NOTE: quiz engine ar trebui sa incerce sa genereze quiz-uri pana
+            //  unul valid este generat
             return res.status(500).json({ error: "No valid quiz JSON found." });
           }
 
           quiz = JSON.parse(match[0]);
 
 
+          // fix naming of the answer field
+          //  sometimes the LLM returns "answer" and sometimes "correctAnswer"
           if (quiz.correctAnswer && !quiz.answer) {
             quiz.answer = quiz.correctAnswer;
+
+            // delete the correctAnswer field from quiz object
             delete quiz.correctAnswer;
           }
 
+          // store the quiz in the database
+          try {
+            await storeQuiz({
+              type: type,
+              content: quiz
+            })
+          } catch (error) {
+            console.error("❌ Eroare la stocarea quiz-ului în baza de date:", error);
+            return res.status(500).json({ error: "Failed to store quiz in database" });
+          }
+
           res.json(quiz);
+
         } catch (error) {
           console.error("❌ Eroare la parsarea quiz-ului:", error);
           console.error("Prompt response complet:", promptResponse);
