@@ -35,6 +35,8 @@ import { getQuizCorrectCompletions } from '../services/dbServices.js';
  * and correctly, along with AI images for each winner
  */
 export async function handleResults(req, res) {
+  //console.log("Am intrat în handleResults!");
+
   /** @type {RequestBody} */
   const { quizId } = req.body;
 
@@ -46,9 +48,11 @@ export async function handleResults(req, res) {
 
   // get completions from the database
   const completions = await getQuizCorrectCompletions(quizId);
+  //console.log("Completări corecte din DB:", completions);
 
   // if no completions, return empty array
   if (completions.length === 0) {
+    //console.log("Top 3 înainte de generare imagini:", topUsers);
     return res.json({ topUsers: [] });
   }
 
@@ -69,7 +73,7 @@ export async function handleResults(req, res) {
     topUsers.map(async (user) => {
 
       // check if user profile picture and display name are given
-      const profilePicture = user.user_data?.profile_picture || null;
+      const profilePicture = user.user_data?.profile_picture_url || null;
       const displayName = user.user_data?.display_name || '';
 
       if (!profilePicture || !displayName) {
@@ -81,10 +85,14 @@ export async function handleResults(req, res) {
       }
 
       try {
+        //console.log(`Generez imagine pentru ${displayName} cu poza: ${profilePicture}`);
+
         user.rewardImage = await generateRewardImage({
           imageUrl: profilePicture,
           userDisplayName: displayName
         });
+        //console.log(`Imagine generată pentru ${displayName}: ${user.rewardImage}`);
+
 
         return user;
 
