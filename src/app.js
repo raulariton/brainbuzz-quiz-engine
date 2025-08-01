@@ -5,7 +5,7 @@ import quizRoute from './routes/quizRoute.js';
 import userAnswerRoute from './routes/userAnswerRoute.js';
 
 //codu asta exista pentru a incarca variabilele din fisierul .env din root folder
-dotenv.config();
+dotenv.config({ quiet: true });
 
 const app = express();
 const port = 3000;
