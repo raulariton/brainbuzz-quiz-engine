@@ -1,4 +1,5 @@
 import { generateRewardImage } from '../services/imageGenerationServices.js';
+import { getQuizCorrectCompletions } from '../services/dbServices.js';
 
 /**
  * NOTE: I made these typedefs to help with documentation,
@@ -19,7 +20,6 @@ import { generateRewardImage } from '../services/imageGenerationServices.js';
  * @typedef {Object} RequestBody
  * @property {string} quizId - ID of the quiz, created when it was generated
  * (`quizzes` table primary key)
- * @property {Completion[]} completions - array of all user completions
  */
 
 /**
@@ -36,13 +36,16 @@ import { generateRewardImage } from '../services/imageGenerationServices.js';
  */
 export async function handleResults(req, res) {
   /** @type {RequestBody} */
-  const { quizId, completions } = req.body;
+  const { quizId } = req.body;
 
-  if (!quizId || !Array.isArray(completions)) {
+  if (!quizId) {
     return res.status(400).json({
-      message: "Invalid request body"
+      message: "Invalid request body. Missing 'quizId'."
     });
   }
+
+  // get completions from the database
+  const completions = await getQuizCorrectCompletions(quizId);
 
   // if no completions, return empty array
   if (completions.length === 0) {
@@ -50,25 +53,43 @@ export async function handleResults(req, res) {
   }
 
   // filter out the first 3 users who completed the quiz correctly
+  // NOTE: we already fetched already correct completions from the DB so no need to filter again
   const topUsers = completions
-    .filter((entry) => entry.correct)
-    .sort((a, b) => new Date(a.completionDate) - new Date(b.completionDate))
+    .sort((a, b) => {
+      // handle null or undefined completion dates
+      if (!a.completion_date) return 1; // a is later, will be last
+      if (!b.completion_date) return -1; // b is later, will be last
+      return new Date(a.completion_date) - new Date(b.completion_date)
+    })
     .slice(0, 3);
 
   // for each user, generate a reward image
   /** @type {TopUser[]} */
   const topUsersWithImages = await Promise.all(
     topUsers.map(async (user) => {
+
+      // check if user profile picture and display name are given
+      const profilePicture = user.user_data?.profile_picture || null;
+      const displayName = user.user_data?.display_name || '';
+
+      if (!profilePicture || !displayName) {
+        console.warn(`Cannot generate reward image of user with ID ${user.user_id} without profile picture and display name.`);
+        return {
+          ...user,
+          rewardImage: null,
+        };
+      }
+
       try {
         user.rewardImage = await generateRewardImage({
-          imageUrl: user.profilePicture,
-          userDisplayName: user.displayName
+          imageUrl: profilePicture,
+          userDisplayName: displayName
         });
 
         return user;
 
       } catch (error) {
-        console.error(`Failed to generate image for ${user.displayName}:`, error);
+        console.error(`Failed to generate image for ${displayName}:`, error);
 
         return {
           ...user,

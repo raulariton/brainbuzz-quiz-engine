@@ -38,11 +38,10 @@ export const storeUserAnswer = async ({ user_id, quiz_id, correct }) => {
 };
 
 export const getQuizCorrectCompletions = async (quiz_id) => {
-  // TODO: also select completion date (supabase table needs to be modified)
   try {
     const { data, error } = await supabaseClient
       .from('user_answers')
-      .select('user_id, correct')
+      .select('user_id, user_data, correct, completion_date')
       .eq('quiz_id', quiz_id)
       .eq('correct', true);
 
