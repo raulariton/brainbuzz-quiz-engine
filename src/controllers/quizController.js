@@ -1,6 +1,7 @@
 import axios from 'axios'; //pentru ollama
 import quizTypes from '../quizTypes.js';
 import { storeQuiz } from '../services/dbServices.js';
+import { getQuizById } from '../services/dbServices.js';
 
 const ACCEPTED_QUIZ_TYPES = ['historical', 'icebreaker', 'movie_quote'];
 
@@ -105,6 +106,31 @@ export class QuizController {
     } catch (err) {
       // other errors
       res.status(500).json({ error: 'Internal server error', details: err.message });
+    }
+  }
+  static async getQuizById(req, res) {
+    const quizId = req.params.id;
+
+    if (!quizId) {
+      return res.status(400).json({ error: 'Missing quiz ID' });
+    }
+
+    try {
+      const quiz = await getQuizById(quizId);
+
+      if (!quiz) {
+        return res.status(404).json({ error: 'Quiz not found' });
+      }
+
+      res.json({
+        quiz_id: quizId,
+        quizText: quiz.quizText,
+        options: quiz.options,
+        answer: quiz.answer
+      });
+    } catch (err) {
+      console.error('❌ Eroare la obținerea quiz-ului:', err);
+      res.status(500).json({ error: 'Internal server error' });
     }
   }
 }

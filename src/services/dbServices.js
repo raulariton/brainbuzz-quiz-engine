@@ -97,3 +97,26 @@ export const getQuizCorrectCompletions = async (quiz_id) => {
     throw new Error('Failed to get quiz completions.');
   }
 }
+
+export const getQuizById = async (quizId) => {
+  try {
+    const { data, error } = await supabaseClient
+      .from('quizzes')
+      .select('quiz') // doar câmpul cu conținutul
+      .eq('quiz_id', quizId)
+      .single();
+
+    if (error) {
+      throw new Error(error.message);
+    }
+
+    return {
+      quizText: data.quiz.quizText,
+      options: data.quiz.options,
+      answer: data.quiz.answer
+    };
+  } catch (error) {
+    console.error('❌ Eroare la getQuizById:', error);
+    throw new Error('Quiz not found');
+  }
+};
