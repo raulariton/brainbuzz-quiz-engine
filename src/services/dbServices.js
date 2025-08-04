@@ -22,7 +22,7 @@ export const storeQuiz = async (quiz) => {
 };
 
 
-export const storeUserAnswer = async ({ user_id, quiz_id, correct }) => {
+export const storeUserAnswer = async ({ user_id, quiz_id, correct, user_data }) => {
   try {
     console.log('📦 Inserare în Supabase:', {
       user_id,
