@@ -1,20 +1,45 @@
 import axios from 'axios'; //pentru ollama
 import quizTypes from '../quizTypes.js';
-import { storeQuiz } from '../services/dbServices.js';
-import { getQuizById } from '../services/dbServices.js';
+import { storeQuiz} from '../services/dbServices.js';
+import { supabaseClient } from '../config/supabaseClient.js';
+
+export async function hasUserCompletedQuiz(user_id, quiz_id) {
+  if (!user_id || !quiz_id) return false; // sau throw error după preferințe
+
+  const { data, error } = await supabaseClient
+    .from('user_answers')
+    .select('user_answer_id')
+    .eq('user_id', user_id)
+    .eq('quiz_id', quiz_id)
+    .limit(1);
+
+  if (error) throw new Error(error.message);
+
+  return data.length > 0;
+}
 
 const ACCEPTED_QUIZ_TYPES = ['historical', 'icebreaker', 'movie_quote'];
 
 export class QuizController {
   static async handleQuizRequest(req, res) {
     const type = req.query.type;
+    const user_id = req.query.user_id;
+    const quiz_id = 'req.query.quiz_id';
 
     if (!type) return res.status(400).json({ error: 'Missing quiz type' });
 
     if (!ACCEPTED_QUIZ_TYPES.includes(type)) {
       return res.status(400).json({ error: 'Invalid quiz type' });
     }
+    try {
+      const alreadyDone = await hasUserCompletedQuiz(user_id, quiz_id);
 
+      if (alreadyDone) {
+        return res.status(403).json({ error: 'Ai completat deja acest quiz.' });
+      }
+    } catch (err) {
+      return res.status(500).json({ error: 'Eroare la verificarea quizului.', details: err.message });
+    }
     try {
       // get prompt from quizTypes based on type
       let prompt = quizTypes[type].prompt;
@@ -108,29 +133,32 @@ export class QuizController {
       res.status(500).json({ error: 'Internal server error', details: err.message });
     }
   }
-  static async getQuizById(req, res) {
-    const quizId = req.params.id;
+  static async checkIfUserCompleted(req, res) {
+    const { user_id, quiz_type } = req.query;
 
-    if (!quizId) {
-      return res.status(400).json({ error: 'Missing quiz ID' });
+    if (!user_id || !quiz_type) {
+      return res.status(400).json({ error: 'Missing user_id or quiz_type' });
     }
 
     try {
-      const quiz = await getQuizById(quizId);
+      const { data, error } = await supabaseClient
+        .from('user_answers')
+        .select('user_answer_id')
+        .eq('user_id', user_id)
+        .eq('quiz_type', quiz_type)
+        .limit(1);
 
-      if (!quiz) {
-        return res.status(404).json({ error: 'Quiz not found' });
+      if (error) throw new Error(error.message);
+
+      if (data.length > 0) {
+        return res.status(200).json({ alreadyCompleted: true });
       }
 
-      res.json({
-        quiz_id: quizId,
-        quizText: quiz.quizText,
-        options: quiz.options,
-        answer: quiz.answer
-      });
+      return res.status(200).json({ alreadyCompleted: false });
     } catch (err) {
-      console.error('❌ Eroare la obținerea quiz-ului:', err);
-      res.status(500).json({ error: 'Internal server error' });
+      console.error('❌ Eroare la verificarea completării:', err);
+      return res.status(500).json({ error: 'Internal server error' });
     }
   }
+
 }
