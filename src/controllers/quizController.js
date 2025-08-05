@@ -1,8 +1,9 @@
 import axios from 'axios'; //pentru ollama
 import quizTypes from '../quizTypes.js';
 import { storeQuiz } from '../services/dbServices.js';
+import { generateQuiz } from '../services/quizServices.js';
 
-const ACCEPTED_QUIZ_TYPES = ['historical', 'icebreaker', 'movie_quote'];
+const ACCEPTED_QUIZ_TYPES = Object.keys(quizTypes);
 
 export class QuizController {
   static async handleQuizRequest(req, res) {
@@ -29,9 +30,10 @@ export class QuizController {
       const ollamaResponse = await axios.post(
         'http://ollama.vsp.dev/api/generate',
         {
-          model: 'llama3.1:latest',
+          model: 'magistral:latest',
           prompt: prompt,
-          stream: true
+          stream: true,
+          think: false
         },
         {
           responseType: 'stream',
