@@ -1,6 +1,7 @@
 import axios from 'axios'; //pentru ollama
 import quizTypes from '../quizTypes.js';
 import { getActiveQuiz, storeQuiz } from '../services/dbServices.js';
+import { generateQuizImage } from '../services/imageGenerationServices.js';
 
 const ACCEPTED_QUIZ_TYPES = Object.keys(quizTypes);
 
@@ -87,13 +88,19 @@ export class QuizController {
           delete quiz.correctAnswer;
         }
 
+        // generate quiz image
+        const quizImageUrl = await generateQuizImage({
+          imagePrompt: quizTypes[type].image_prompt
+        })
+
         const quizId = await storeQuiz({ type, quiz, duration });
 
         return res.json({
           quiz_id: quizId,
           quizText: quiz.quizText,
           options: quiz.options,
-          answer: quiz.answer
+          answer: quiz.answer,
+          imageUrl: quizImageUrl
         });
       });
 

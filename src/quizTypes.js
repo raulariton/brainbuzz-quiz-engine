@@ -17,6 +17,7 @@ const quizTypes = {
     - The correct answer must be an event that strictly corresponds to the date.
     - Respect the JSON format strictly. Do not include any additional text or explanations.
     - An example for an option is "[SHORT EVENT DESCRIPTION], [YEAR]". Follow this format for all options.`,
+    image_prompt: `Cartoon-style collage with thick strokes, showcasing pop culture through the decades. Include colorful illustrations of iconic items and styles: a vinyl record, cassette tape, boombox, Rubik’s cube, floppy disk, flip phone, early MP3 player, disco ball, VHS tape, lava lamp, retro video game console, and fashion styles like platform shoes, neon windbreakers, and skinny jeans. Bright, nostalgic, and playful atmosphere. No real people or logos or text, just symbolic objects representing the eras.`
   },
 
   icebreaker: {
@@ -35,6 +36,7 @@ const quizTypes = {
     - The options should be humorous or relatable.
     - The correct answer should be one of the options provided.
     - Respect the JSON format strictly. Do not include any additional text or explanations.`,
+    image_prompt: `Cartoon-style image with thick strokes showing a playful icebreaker game in progress: a spinning bottle surrounded by colorful question cards, a whiteboard with doodles like 'Who is more likely to...', party snacks on a table, and balloons tied to office chairs. No people or faces. Vivid, energetic, with an easy-going and humorous tone.`
   },
 
   movie_quote: {
@@ -59,7 +61,8 @@ const quizTypes = {
     - Escape any internal quotes correctly.
     - Do NOT include headings like "Quote:", "Options:", "Correct answer:", only the JSON.
     - The quiz should focus on famous quotes and correct attribution (actor + movie).
-    `
+    `,
+    image_prompt: `Cartoon-style collage with thick strokes featuring iconic movie and TV elements: popcorn bucket, classic cinema clapperboard, retro TV set, film reels. Include silhouette-style or generic representations of globally recognized movie/TV characters (e.g., wizard with glasses, sci-fi soldier, superhero cape), avoiding direct likeness to copyrighted characters. Use bright, cinematic colors—reds, yellows, dark blues—and add sparkles or light flares to evoke a theater atmosphere.`
   },
 
   emoji_riddle: {
@@ -79,6 +82,7 @@ const quizTypes = {
     - The options should be plausible and related to the emoji.
     - The correct answer should be one of the options provided.
     - Respect the JSON format strictly. Do not include any additional text or explanations.`,
+    image_prompt: `Cartoon-style illustration with thick strokes featuring a colorful cluster of oversized emojis arranged like a puzzle or riddle. Include classic emojis like the thinking face 🤔, magnifying glass 🔍, sunglasses 😎, rocket 🚀, heart ❤️, pizza 🍕, etc., floating around or stacked playfully. Place a cartoon speech bubble with a question mark inside or a chalkboard with emojis written on it. Bright, fun, and slightly mysterious to evoke the idea of solving an emoji puzzle. No humans or animals.`
   },
 
 
