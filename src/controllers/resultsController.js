@@ -58,17 +58,20 @@ export async function handleResults(req, res) {
 
   // filter out the first 3 users who completed the quiz correctly
   // NOTE: we already fetched already correct completions from the DB so no need to filter again
-  const topUsers = completions
-    .sort((a, b) => {
+    const sortedCompletions = completions.sort((a, b) => {
       // handle null or undefined completion dates
       if (!a.completion_date) return 1; // a is later, will be last
       if (!b.completion_date) return -1; // b is later, will be last
       return new Date(a.completion_date) - new Date(b.completion_date)
-    })
-    .slice(0, 3);
+    });
+
+    const topUsers = sortedCompletions.slice(0, 3);
+
+    //trimite locu 4,5,6+ la locu 4,5,6+
+    const otherUsers = sortedCompletions.slice(3);
 
   // for each user, generate a reward image
-  /** @type {TopUser[]} */
+  /**  @type {TopUser[]} */
   const topUsersWithImages = await Promise.all(
     topUsers.map(async (user) => {
 
@@ -105,8 +108,13 @@ export async function handleResults(req, res) {
         };
       }
   }));
+  const otherUsersWithPlacement = otherUsers.map((user, index) => ({
+    ...user,
+    placement: index + 4  // pentru că primii 3 sunt deja în top
+  }));
 
   return res.status(200).json({
-    topUsersWithImages
+    topUsersWithImages,
+    otherUsersWithPlacement
   });
 }
