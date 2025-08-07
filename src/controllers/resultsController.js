@@ -66,10 +66,9 @@ export async function handleResults(req, res) {
     });
 
     const topUsers = sortedCompletions.slice(0, 3);
-    //trimite locu 4,5,6 la locu 1,2,3
-    const otherUsers = sortedCompletions.slice(0, 3);
+
     //trimite locu 4,5,6+ la locu 4,5,6+
-    //const otherUsers = sortedCompletions.slice(3);
+    const otherUsers = sortedCompletions.slice(3);
 
   // for each user, generate a reward image
   /**  @type {TopUser[]} */
