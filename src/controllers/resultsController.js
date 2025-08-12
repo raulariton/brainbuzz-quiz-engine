@@ -30,34 +30,33 @@ import { getQuizCorrectCompletions } from '../services/dbServices.js';
  * @property {string} rewardImage - URL to the generated reward image
  */
 
-/**
- * Given the completions of a quiz, return the 3 users who completed the quiz first
- * and correctly, along with AI images for each winner
- */
-export async function handleResults(req, res) {
-  //console.log("Am intrat în handleResults!");
+export class ResultsController {
+  /**
+   * Given the completions of a quiz, return the 3 users who completed the quiz first
+   * and correctly, along with AI images for each winner
+   */
+  static async handleResults(req, res) {
+    /** @type {RequestBody} */
+    const { quizId } = req.body;
 
-  /** @type {RequestBody} */
-  const { quizId } = req.body;
+    if (!quizId) {
+      return res.status(400).json({
+        error: "Invalid request body. Missing 'quizId'."
+      });
+    }
 
-  if (!quizId) {
-    return res.status(400).json({
-      message: "Invalid request body. Missing 'quizId'."
-    });
-  }
+    // get completions from the database
+    const completions = await getQuizCorrectCompletions(quizId);
+    //console.log("Completări corecte din DB:", completions);
 
-  // get completions from the database
-  const completions = await getQuizCorrectCompletions(quizId);
-  //console.log("Completări corecte din DB:", completions);
+    // if no completions, return empty array
+    if (completions.length === 0) {
+      //console.log("Top 3 înainte de generare imagini:", topUsers);
+      return res.status(200).json({ topUsers: [] });
+    }
 
-  // if no completions, return empty array
-  if (completions.length === 0) {
-    //console.log("Top 3 înainte de generare imagini:", topUsers);
-    return res.json({ topUsers: [] });
-  }
-
-  // filter out the first 3 users who completed the quiz correctly
-  // NOTE: we already fetched already correct completions from the DB so no need to filter again
+    // filter out the first 3 users who completed the quiz correctly
+    // NOTE: we already fetched already correct completions from the DB so no need to filter again
     const sortedCompletions = completions.sort((a, b) => {
       // handle null or undefined completion dates
       if (!a.completion_date) return 1; // a is later, will be last
@@ -70,51 +69,48 @@ export async function handleResults(req, res) {
     //trimite locu 4,5,6+ la locu 4,5,6+
     const otherUsers = sortedCompletions.slice(3);
 
-  // for each user, generate a reward image
-  /**  @type {TopUser[]} */
-  const topUsersWithImages = await Promise.all(
-    topUsers.map(async (user) => {
+    // for each user, generate a reward image
+    /**  @type {TopUser[]} */
+    const topUsersWithImages = await Promise.all(
+      topUsers.map(async (user) => {
 
-      // check if user profile picture and display name are given
-      const profilePicture = user.user_data?.profile_picture_url || null;
-      const displayName = user.user_data?.display_name || '';
+        // check if user profile picture and display name are given
+        const profilePicture = user.user_data?.profile_picture_url || null;
+        const displayName = user.user_data?.display_name || '';
 
-      if (!profilePicture || !displayName) {
-        console.warn(`Cannot generate reward image of user with ID ${user.user_id} without profile picture and display name.`);
-        return {
-          ...user,
-          rewardImage: null,
-        };
-      }
+        if (!profilePicture || !displayName) {
+          console.warn(`Cannot generate reward image of user with ID ${user.user_id} without profile picture and display name.`);
+          return {
+            ...user,
+            rewardImage: null,
+          };
+        }
 
-      try {
-        //console.log(`Generez imagine pentru ${displayName} cu poza: ${profilePicture}`);
+        try {
+          user.rewardImage = await generateRewardImage({
+            imageUrl: profilePicture,
+            userDisplayName: displayName
+          });
 
-        user.rewardImage = await generateRewardImage({
-          imageUrl: profilePicture,
-          userDisplayName: displayName
-        });
-        //console.log(`Imagine generată pentru ${displayName}: ${user.rewardImage}`);
+          return user;
 
+        } catch (error) {
+          console.error(`Failed to generate image for ${displayName}:`, error);
 
-        return user;
+          return {
+            ...user,
+            rewardImage: null
+          };
+        }
+      }));
+    const otherUsersWithPlacement = otherUsers.map((user, index) => ({
+      ...user,
+      placement: index + 4  // pentru că primii 3 sunt deja în top
+    }));
 
-      } catch (error) {
-        console.error(`Failed to generate image for ${displayName}:`, error);
-
-        return {
-          ...user,
-          rewardImage: null
-        };
-      }
-  }));
-  const otherUsersWithPlacement = otherUsers.map((user, index) => ({
-    ...user,
-    placement: index + 4  // pentru că primii 3 sunt deja în top
-  }));
-
-  return res.status(200).json({
-    topUsersWithImages,
-    otherUsersWithPlacement
-  });
+    return res.status(200).json({
+      topUsersWithImages,
+      otherUsersWithPlacement
+    });
+  }
 }
