@@ -1,24 +1,43 @@
 const quizTypes = {
   historical: {
-    prompt: `Create a historical quiz question for a workplace Slack bot. Use the current date ({{currentDate}}). 
-    The quiz should be in the following format:
-    \`\`\`
-    { 
-      "quizText": "...",
-      "options": ["...", "...", "...", "..."],
-      "answer": "..."
-    }
-    \`\`\`
-    GUIDELINES:
-    - Fact-check the events to ensure accuracy.
-    - Only include events that are significant and well-known.
-    - Ensure the options are plausible and related to the question.
-    - The answer must be one of the options provided.
-    - The correct answer must be an event that strictly corresponds to the date.
-    - Respect the JSON format strictly. Do not include any additional text or explanations.
-    - An example for an option is "[SHORT EVENT DESCRIPTION], [YEAR]". Follow this format for all options.`,
+    prompt: `Create a single "On This Day" multiple-choice question for a workplace Slack bot. Use the current date ({{currentDate}}).
+
+Return ONLY this JSON (no extra text, no markdown):
+{
+  "quizText": "...",
+  "options": ["...", "...", "...", "..."],
+  "answer": "..."
+}
+
+SCOPE:
+- Search ACROSS ALL DOMAINS tied strictly to this month/day:
+  • Global history (wars/politics/space/treaties).
+  • Elite sports (World Cup/UEFA CL/Super Bowl/Grand Slams/NBA Finals; Olympic world records/landmarks).
+  • Music (iconic albums/singles, major chart records; globally known artists’ births/deaths).
+  • Film/TV & celebrities (blockbuster releases, Academy Awards milestones, globally famous births/deaths).
+- Choose the MOST internationally recognizable single-day item. Avoid local/niche topics.
+
+DATE RULES (mandatory):
+- The correct event MUST have an undisputed month/day equal to {{currentDate}} (ignore the year).
+- If you are not 100% certain about the exact month/day, choose a different event.
+
+
+QUESTION:
+- ONE clear question about that exact-date event; ≤ 200 characters; include the YEAR in the question; avoid trick/negative phrasing.
+
+OPTIONS:
+- EXACTLY 4 distinct options, each formatted "[SHORT EVENT DESCRIPTION], [YEAR]".
+- Only ONE option is correct and strictly matches {{currentDate}} (same month/day; year is the historical year).
+- The other 3 are believable distractors from a similar domain/era but NOT on {{currentDate}}.
+- No letters/bullets; just the strings. Randomize order.
+- "answer" must be EXACTLY one of the options (character-for-character).
+
+GUARDRAILS:
+- Fact-check names/titles/years; use correct spelling/diacritics.
+- Return STRICT JSON only—no explanations, no extra keys.`,
     image_prompt: `Cartoon-style collage with thick strokes, showcasing pop culture through the decades. Include colorful illustrations of iconic items and styles: a vinyl record, cassette tape, boombox, Rubik’s cube, floppy disk, flip phone, early MP3 player, disco ball, VHS tape, lava lamp, retro video game console, and fashion styles like platform shoes, neon windbreakers, and skinny jeans. Bright, nostalgic, and playful atmosphere. No real people or logos or text, just symbolic objects representing the eras.`
   },
+
 
   icebreaker: {
     prompt: `Create a light-hearted multiple choice icebreaker question for a workplace Slack bot. 
