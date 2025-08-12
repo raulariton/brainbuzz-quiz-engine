@@ -99,7 +99,11 @@ export const storeUserAnswer = async ({ user_id, quiz_id, correct, user_data }) 
   }
 };
 
-
+/**
+ * Get the most recent active quiz of a specific type.
+ * @return The quiz, if there is already an active quiz of the specified, type,
+ * or null if there is no active quiz.
+ */
 export const getActiveQuiz = async (type, duration) => {
   const { data: activeQuiz, error } = await supabaseClient
     .from('quizzes')
