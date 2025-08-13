@@ -4,11 +4,8 @@ export class UserAnswerController {
   static async handleAnswerSubmission(req, res) {
     const { user_id, quiz_id, correct, user_data } = req.body;
 
-    console.log('🔄 Primit de la client:', { user_id, quiz_id, correct, user_data });
-
     // Validare date (acceptăm dacă poza lipsește, dar numele trebuie să fie prezent)
     if (!user_id || !quiz_id || typeof correct === 'undefined' || !user_data?.display_name) {
-      console.warn('⚠️ Date lipsă sau invalide în request body!');
       return res.status(400).json({ error: 'Missing or invalid fields' });
     }
 

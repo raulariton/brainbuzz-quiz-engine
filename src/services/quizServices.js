@@ -9,20 +9,8 @@ export async function generateQuiz(type) {
   // if the type is 'historical',
   // replace the {{currentDate}} placeholder with the current date
   if (type === 'historical') {
-    const quiz = await getHistoricalQuiz('wikimedia', 4);
-    if (!quiz) {
-      if (process.env.NODE_ENV === 'dev') {
-        console.error('Failed to generate historical quiz.');
-      }
-
-      // return null to signify that the quiz could not be generated
-      return null;
-    }
-    return {
-      quizText: quiz.quizText,
-      options: quiz.options,
-      answer: quiz.answer
-    };
+    const currentDate = new Date().toISOString().split('T')[0];
+    prompt = prompt.replace('{{currentDate}}', currentDate);
   }
 
   let validResponse = false;
