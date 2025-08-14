@@ -5,6 +5,8 @@ import { generateQuizImage } from '../services/imageGenerationServices.js';
 import { generateQuiz } from '../services/quizServices.js';
 
 const ACCEPTED_QUIZ_TYPES = Object.keys(quizTypes);
+// add the trivia quiz type to the accepted quiz types
+ACCEPTED_QUIZ_TYPES.push('computer_trivia');
 
 export class QuizController {
   static async handleQuizRequest(req, res) {

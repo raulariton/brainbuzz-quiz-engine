@@ -104,7 +104,11 @@ GUARDRAILS:
     image_prompt: `Cartoon-style illustration with thick strokes featuring a colorful cluster of oversized emojis arranged like a puzzle or riddle. Include classic emojis like the thinking face 🤔, magnifying glass 🔍, sunglasses 😎, rocket 🚀, heart ❤️, pizza 🍕, etc., floating around or stacked playfully. Place a cartoon speech bubble with a question mark inside or a chalkboard with emojis written on it. Bright, fun, and slightly mysterious to evoke the idea of solving an emoji puzzle. No humans or animals.`
   },
 
-
+  computer_trivia: {
+    // no prompt since the trivia quiz is fetched from an external API
+    prompt: ``,
+    image_prompt: `Cartoon-style thick-stroke image of a retro computer (CRT monitor, floppy disk) and a sleek modern laptop on opposite sides of the image, facing off like rivals, with lightning bolts between them. Surround them with quirky tech icons like a Wi-Fi symbol, old mouse, smartphone, and code snippets. Fun and bold colors, no humans.`
+  }
 };
 
 export default quizTypes;
