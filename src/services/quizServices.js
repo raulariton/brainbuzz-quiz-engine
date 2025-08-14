@@ -13,6 +13,23 @@ export async function generateQuiz(type) {
     prompt = prompt.replace('{{currentDate}}', currentDate);
   }
 
+  if (type === 'computer_trivia') {
+    const quiz = await getTriviaQuiz(type);
+
+    if (!quiz) {
+      if (process.env.NODE_ENV === 'dev') {
+        console.error('Failed to generate trivia quiz');
+      }
+      return null; // return null to signify that the quiz could not be generated
+    }
+
+    return {
+      quizText: quiz.quizText,
+      options: quiz.options,
+      answer: quiz.answer
+    };
+  }
+
   let validResponse = false;
   let requestsMade = 0;
   const maxRequests = 5; // limit the number of requests to avoid infinite loop
@@ -204,4 +221,51 @@ async function getWikimediaEvent(date) {
     }
     return null; // Return null in case of error
   }
+}
+
+async function getTriviaQuiz(quizType) {
+
+  const typeMap = {
+    'computer_trivia': 18,
+  }
+
+  try {
+    const response = await axios.get(
+      `https://opentdb.com/api.php`,{
+        params: {
+          amount: 1,
+          category: typeMap[quizType],
+          difficulty: 'easy',
+          type: 'multiple',
+          encode: 'url3986'
+        }
+      }
+    )
+
+    if (response.data.response_code !== 0) {
+      throw new Error(`Failed to fetch trivia quiz (response code ${response.data.response_code})`);
+    }
+
+    const returnedQuiz = response.data.results[0];
+    const quizText = decodeURIComponent(returnedQuiz.question);
+    const answer = decodeURIComponent(returnedQuiz.correct_answer);
+    const options = returnedQuiz.incorrect_answers.map(option => decodeURIComponent(option));
+    options.push(answer); // add the correct answer to the options
+    options.sort(() => Math.random() - 0.5); // shuffle the options
+
+    return {
+      quizText: quizText,
+      options: options,
+      answer: answer
+    };
+
+  } catch (error) {
+    if (process.env.NODE_ENV === 'dev') {
+      console.error('Error fetching trivia quiz:', error.message);
+    }
+    return null; // Return null in case of error
+  }
+
+
+
 }
