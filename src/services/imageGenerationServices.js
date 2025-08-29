@@ -8,10 +8,7 @@ fal.config({
 });
 
 
-const REWARD_IMAGE_GENERATION_PROMPT = `Using the provided picture of a profile picture of a human,
-generate an image of the human as a king sitting on a throne.
-If the image is not a human, create a poster image with the text: {{DISPLAY_NAME}}. 
-`;
+const REWARD_IMAGE_GENERATION_PROMPT = `A realistic, high-resolution image of a person sitting on an ornate throne in a majestic setting, wearing a large gold medal on a ribbon around their neck. The person looks powerful and confident, dressed in elegant royal attire (e.g., a modern twist on a regal outfit or a luxurious suit/dress). The throne should be grand, with intricate carvings and velvet cushions, placed in a bright hall with soft golden lighting. Make the medal shine and be clearly visible. The person’s face should match the provided profile picture, blended naturally for a lifelike result. Overall tone: celebratory, majestic, and prestigious.`;
 
 export const generateRewardImage = async ({ imageUrl, userDisplayName }) => {
   try {
