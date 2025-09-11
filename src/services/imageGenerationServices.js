@@ -39,31 +39,3 @@ export const generateRewardImage = async ({ imageUrl, userDisplayName }) => {
     throw new Error('Failed to generate reward image');
   }
 };
-
-export async function generateQuizImage({imagePrompt}) {
-  try {
-    const result = await fal.subscribe(
-      "fal-ai/flux-1/schnell",
-      {
-        input: {
-          num_inference_steps: 6, // default is 4
-          prompt: imagePrompt,
-          image_size: "square",
-        },
-        logs: true,
-        onQueueUpdate: (update) => {
-          if (update.status === "IN_PROGRESS") {
-            update.logs.map((log) => log.message).forEach(console.log);
-          }
-        }
-      }
-    );
-
-    // return generated image URL
-    return result.data.images[0].url;
-
-  } catch (error) {
-    console.error('Error generating quiz image:', error);
-    throw new Error('Failed to generate quiz image');
-  }
-}
