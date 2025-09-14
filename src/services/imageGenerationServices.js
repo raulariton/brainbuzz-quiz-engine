@@ -1,5 +1,6 @@
 import { fal } from '@fal-ai/client';
 import dotenv from 'dotenv';
+import { faker } from '@faker-js/faker';
 
 dotenv.config();
 
@@ -39,3 +40,7 @@ export const generateRewardImage = async ({ imageUrl, userDisplayName }) => {
     throw new Error('Failed to generate reward image');
   }
 };
+
+export const generateMockImage = async ({ imageUrl, userDisplayName }) => {
+  return faker.image.personPortrait({ size: 512 });
+}

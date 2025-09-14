@@ -1,4 +1,4 @@
-import { generateRewardImage } from '../services/imageGenerationServices.js';
+import { generateMockImage, generateRewardImage } from '../services/imageGenerationServices.js';
 import { getQuizCorrectCompletions } from '../services/dbServices.js';
 
 /**
@@ -87,7 +87,7 @@ export class ResultsController {
         }
 
         try {
-          user.rewardImage = await generateRewardImage({
+          user.rewardImage = await generateMockImage({
             imageUrl: profilePicture,
             userDisplayName: displayName
           });
