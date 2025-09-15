@@ -1,7 +1,6 @@
 import axios from 'axios'; //pentru ollama
 import quizTypes from '../quizTypes.js';
 import { getActiveQuiz, storeQuiz } from '../services/dbServices.js';
-import { generateQuizImage } from '../services/imageGenerationServices.js';
 import { generateQuiz } from '../services/quizServices.js';
 
 const ACCEPTED_QUIZ_TYPES = Object.keys(quizTypes);
@@ -35,16 +34,6 @@ export class QuizController {
       return res.status(500).json({ error: 'Failed to generate quiz' });
     }
 
-    // generate quiz image
-    let quizImageUrl;
-    try {
-      quizImageUrl = await generateQuizImage({
-        imagePrompt: quizTypes[type].image_prompt
-      })
-    } catch (error) {
-      return res.status(500).json({ error: 'Failed to generate quiz image' });
-    }
-
     let quizId;
     try {
       quizId = await storeQuiz({ type, quiz, duration });
@@ -57,7 +46,6 @@ export class QuizController {
       quizText: quiz.quizText,
       options: quiz.options,
       answer: quiz.answer,
-      imageUrl: quizImageUrl
     });
   }
 }

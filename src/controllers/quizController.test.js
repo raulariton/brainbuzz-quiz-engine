@@ -1,5 +1,4 @@
 import { QuizController } from './quizController.js';
-import { generateQuizImage } from '../services/imageGenerationServices.js';
 import { generateQuiz } from '../services/quizServices.js';
 import quizTypes from '../quizTypes.js';
 import { getActiveQuiz, storeQuiz } from '../services/dbServices.js';
@@ -26,11 +25,6 @@ jest.mock('../services/dbServices.js', () => ({
 // mock the quiz service
 jest.mock('../services/quizServices.js', () => ({
   generateQuiz: jest.fn(),
-}));
-
-// mock the image generation service
-jest.mock('../services/imageGenerationServices.js', () => ({
-  generateQuizImage: jest.fn()
 }));
 
 // mock axios
@@ -104,30 +98,6 @@ describe('GET /quiz', () => {
       expect(res.json).toHaveBeenCalledWith({ error: 'Failed to generate quiz' });
     })
 
-    test('error 500 if quiz image generation fails', async () => {
-      req.query = { type: 'historical', duration: 60 };
-
-      // mock the dbService to return no active quiz
-      getActiveQuiz.mockResolvedValue(null);
-
-      // mock the quiz generation service
-      const mockQuiz = {
-        quizText: 'In what year was the YouTube website launched?',
-        options: ['2006', '2005', '2008'],
-        answer: '2005'
-      }
-      generateQuiz.mockResolvedValue(mockQuiz);
-
-      // mock the quiz generation service to return null
-      //  indicating failure
-      generateQuizImage.mockRejectedValue(new Error('Image generation failed'));
-
-      await QuizController.handleQuizRequest(req, res);
-
-      expect(res.status).toHaveBeenCalledWith(500);
-      expect(res.json).toHaveBeenCalledWith({ error: 'Failed to generate quiz image' });
-    })
-
     test('error 500 if storing quiz fails', async () => {
       req.query = { type: 'historical', duration: 60 };
 
@@ -149,7 +119,7 @@ describe('GET /quiz', () => {
       await QuizController.handleQuizRequest(req, res);
 
       expect(res.status).toHaveBeenCalledWith(500);
-      expect(res.json).toHaveBeenCalledWith({ error: 'Failed to generate quiz image' });
+      expect(res.json).toHaveBeenCalledWith({ error: 'Failed to store quiz' });
     })
 
     test('a new quiz if no active quiz exists', async () => {
@@ -166,12 +136,6 @@ describe('GET /quiz', () => {
       }
       generateQuiz.mockResolvedValue(mockQuiz);
 
-      // mock the image generation service
-      //  so it returns an image URL that the controller needs
-      const mockImageUrl = 'http://example.com/quiz-image.png';
-      // ensure the generateQuizImage was called with the correct prompt
-      generateQuizImage.mockResolvedValue(mockImageUrl);
-
       // mock the storeQuiz method
       //  to simulate storing the quiz in the database
       //  and returning a new quiz_id that the controller needs
@@ -179,16 +143,11 @@ describe('GET /quiz', () => {
 
       await QuizController.handleQuizRequest(req, res);
 
-      expect(generateQuizImage).toHaveBeenCalledWith({
-        imagePrompt: quizTypes[req.query.type].image_prompt
-      });
-
       expect(res.json).toHaveBeenCalledWith({
         quiz_id: mockQuizID,
         quizText: mockQuiz.quizText,
         options: mockQuiz.options,
         answer: mockQuiz.answer,
-        imageUrl: mockImageUrl
       });
     })
   })

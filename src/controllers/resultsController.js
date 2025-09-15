@@ -1,5 +1,6 @@
-import { generateRewardImage } from '../services/imageGenerationServices.js';
+import { generateMockImage, generateRewardImage } from '../services/imageGenerationServices.js';
 import { getQuizCorrectCompletions } from '../services/dbServices.js';
+import logger from '../utils/logger.js';
 
 /**
  * NOTE: I made these typedefs to help with documentation,
@@ -47,11 +48,9 @@ export class ResultsController {
 
     // get completions from the database
     const completions = await getQuizCorrectCompletions(quizId);
-    //console.log("Completări corecte din DB:", completions);
 
     // if no completions, return empty array
     if (completions.length === 0) {
-      //console.log("Top 3 înainte de generare imagini:", topUsers);
       return res.status(200).json({ topUsers: [] });
     }
 
@@ -79,7 +78,7 @@ export class ResultsController {
         const displayName = user.user_data?.display_name || '';
 
         if (!profilePicture || !displayName) {
-          console.warn(`Cannot generate reward image of user with ID ${user.user_id} without profile picture and display name.`);
+          logger.warn(`Cannot generate reward image of user with ID ${user.user_id} without profile picture and display name.`);
           return {
             ...user,
             rewardImage: null,
@@ -87,7 +86,7 @@ export class ResultsController {
         }
 
         try {
-          user.rewardImage = await generateRewardImage({
+          user.rewardImage = await generateMockImage({
             imageUrl: profilePicture,
             userDisplayName: displayName
           });
@@ -95,7 +94,7 @@ export class ResultsController {
           return user;
 
         } catch (error) {
-          console.error(`Failed to generate image for ${displayName}:`, error);
+          logger.error(`Failed to generate image for ${displayName}:`, error)
 
           return {
             ...user,

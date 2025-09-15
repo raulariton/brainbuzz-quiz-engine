@@ -1,7 +1,9 @@
 import { supabaseClient } from '../config/supabaseClient.js';
 import crypto from 'crypto';
+import logger from '../utils/logger.js';
 
 export const storeQuiz = async ({ type, quiz, duration }) => {
+  // TODO: automatically create UUID in supabase
   const quizId = crypto.randomUUID();
 
   try {
@@ -21,8 +23,6 @@ export const storeQuiz = async ({ type, quiz, duration }) => {
 
     if (error) throw new Error(error.message);
 
-    console.log('✅ Quiz salvat cu succes în Supabase!', quizId);
-
     // Dezactivează automat după 15 secunde
     setTimeout(async () => {
       const { error: updErr } = await supabaseClient
@@ -30,13 +30,13 @@ export const storeQuiz = async ({ type, quiz, duration }) => {
         .update({ is_active: false })
         .eq('quiz_id', quizId);
 
-      if (updErr) console.error('❌ Eroare dezactivare quiz:', updErr);
-      else console.log(`🔕 Quiz ${quizId} inactiv acum.`);
+      if (updErr) logger.error("Error updating quiz to become inactive");
+
     }, duration * 1000);
 
     return quizId;
   } catch (err) {
-    console.error('❌ Error storing quiz in DB:', err);
+    logger.error('Error storing quiz in DB:', err);
     throw new Error('Failed to store quiz in database.');
   }
 };
@@ -45,13 +45,6 @@ export const storeQuiz = async ({ type, quiz, duration }) => {
 
 export const storeUserAnswer = async ({ user_id, quiz_id, correct, user_data }) => {
   try {
-    console.log('📦 Inserare în Supabase:', {
-      user_id,
-      quiz_id,
-      correct,
-      user_data
-    });
-
     // 1. Inserează răspunsul în user_answers
     const { data: answerData, error: insertError } = await supabaseClient
       .from('user_answers')
@@ -59,7 +52,7 @@ export const storeUserAnswer = async ({ user_id, quiz_id, correct, user_data }) 
       .select('user_answer_id');
 
     if (insertError) {
-      console.error('❌ Supabase insert error:', insertError);
+      logger.error("Error inserting into user_answers:", insertError);
       throw new Error(insertError.message);
     }
 
@@ -71,7 +64,7 @@ export const storeUserAnswer = async ({ user_id, quiz_id, correct, user_data }) 
       .single();
 
     if (readError) {
-      console.error('❌ Supabase select error:', readError);
+      logger.error("Error reading current answers count:", readError);
       throw new Error(readError.message);
     }
 
@@ -83,18 +76,17 @@ export const storeUserAnswer = async ({ user_id, quiz_id, correct, user_data }) 
       .single();
 
     if (updateError) {
-      console.error('❌ Supabase update error:', updateError);
+      logger.error("Error inserting into user_answers:", updateError);
       throw new Error(updateError.message);
     }
 
 
-    console.log('✅ Răspuns salvat și counter incrementat:', answerData[0]?.user_answer_id);
     return {
       user_answer_id: answerData[0]?.user_answer_id,
       updated_answers: updatedQuiz[0]?.answers
     };
   } catch (err) {
-    console.error('❌ Unexpected error storing user answer:', err);
+    logger.error('❌ Unexpected error storing user answer:', err);
     throw err;
   }
 };
@@ -148,7 +140,7 @@ export const getQuizCorrectCompletions = async (quiz_id) => {
     return data;
 
   } catch (error) {
-    console.error('Error getting quiz completions from DB: ', error);
+    logger.error('Error getting quiz completions from DB: ', error);
     throw new Error('Failed to get quiz completions.');
   }
 }

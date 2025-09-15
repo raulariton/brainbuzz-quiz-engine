@@ -1,4 +1,5 @@
 import { storeUserAnswer } from '../services/dbServices.js';
+import logger from '../utils/logger.js';
 
 export class UserAnswerController {
   static async handleAnswerSubmission(req, res) {
@@ -25,14 +26,13 @@ export class UserAnswerController {
         user_data: finalUserData,
       });
 
-      console.log('✅ Răspuns salvat în baza de date.');
       res.status(201).json({
         message: 'Answer saved',
         user_answer_id,
         total_answers: updated_answers,
       });
     } catch (error) {
-      console.error('❌ Eroare la salvarea răspunsului:', error.message);
+      logger.error('Error submitting user answer: ', error.message);
       res.status(500).json({ error: 'Failed to save answer', details: error.message });
     }
   }

@@ -4,9 +4,11 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "start": "nodemon src/app.js"
+    "dev": "nodemon src/app.js",
+    "start": "node src/app.js"
   },
   "dependencies": {
+    "@faker-js/faker": "^9.9.0",
     "@fal-ai/client": "^1.6.1",
     "@supabase/supabase-js": "^2.53.0",
     "array-shuffle": "^3.0.0",
@@ -18,13 +20,13 @@
     "http-errors": "~1.6.3",
     "jade": "~1.11.0",
     "moment": "^2.30.1",
-    "morgan": "~1.9.1"
+    "morgan": "~1.9.1",
+    "winston": "^3.17.0"
   },
   "devDependencies": {
     "@babel/core": "^7.28.0",
     "@babel/plugin-transform-modules-commonjs": "^7.27.1",
     "@babel/preset-env": "^7.28.0",
-    "@faker-js/faker": "^9.9.0",
     "babel-jest": "^30.0.5",
     "jest": "^30.0.5",
     "nodemon": "^3.1.10",

@@ -1,6 +1,7 @@
 import quizTypes from '../quizTypes.js';
 import axios from 'axios';
 import moment from 'moment';
+import logger from '../utils/logger.js';
 
 export async function generateQuiz(type) {
   // get the prompt from the type
@@ -17,9 +18,7 @@ export async function generateQuiz(type) {
     const quiz = await getTriviaQuiz(type);
 
     if (!quiz) {
-      if (process.env.NODE_ENV === 'dev') {
-        console.error('Failed to generate trivia quiz');
-      }
+      logger.error('Failed to generate trivia quiz');
       return null; // return null to signify that the quiz could not be generated
     }
 
@@ -58,9 +57,8 @@ export async function generateQuiz(type) {
       // increment either way
       requestsMade++;
 
-      if (process.env.NODE_ENV === 'dev') {
-        console.error('Error making request to Ollama:', error.message);
-      }
+      logger.error('Error making request to Ollama:', error.message);
+
       // in case of error, make another request
       continue;
 
@@ -70,28 +68,21 @@ export async function generateQuiz(type) {
     const responseQuiz = response.data.response;
     requestsMade++;
 
-    if (process.env.NODE_ENV === 'dev') console.log('Ollama quiz: ', responseQuiz);
-
     // parse the quiz from the response
     quizJson = parseQuiz(responseQuiz);
 
     if (!quizJson) {
-      if (process.env.NODE_ENV === 'dev') {
-        console.error('Failed to parse quiz from response:', responseQuiz);
-      }
+      logger.error('Failed to parse quiz from response:', responseQuiz);
+
       // in case of error, make another request
       continue;
     }
-
-    if (process.env.NODE_ENV === 'dev') console.log('Parsed quiz successfully: ', quizJson);
 
     validResponse = true;
   } // end of while loop
 
   if (requestsMade >= maxRequests) {
-    if (process.env.NODE_ENV === 'dev') {
-      console.error('Unable to generate a valid quiz after multiple attempts.');
-    }
+    logger.error('Unable to generate a valid quiz after multiple attempts.');
 
     // return null to signify that the quiz could not be generated
     return null;
@@ -117,7 +108,7 @@ function parseQuiz(responseQuiz) {
   );
 
   if (!match) {
-    if (process.env.NODE_ENV === 'dev') console.error('Unable to find RegEx match.');
+    logger.error('Unable to find RegEx match.');
 
     // return null to signify that the quiz could not be parsed
     return null;
@@ -216,9 +207,8 @@ async function getWikimediaEvent(date) {
     return randomEvent;
 
   } catch (error) {
-    if (process.env.NODE_ENV === 'dev') {
-      console.error('Error fetching data from Wikimedia API:', error.message);
-    }
+    logger.error('Error fetching data from Wikimedia API:', error.message);
+
     return null; // Return null in case of error
   }
 }
@@ -260,9 +250,7 @@ async function getTriviaQuiz(quizType) {
     };
 
   } catch (error) {
-    if (process.env.NODE_ENV === 'dev') {
-      console.error('Error fetching trivia quiz:', error.message);
-    }
+    logger.error('Error fetching trivia quiz:', error.message);
     return null; // Return null in case of error
   }
 
