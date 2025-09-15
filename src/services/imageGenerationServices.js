@@ -1,8 +1,9 @@
 import { fal } from '@fal-ai/client';
 import dotenv from 'dotenv';
 import { faker } from '@faker-js/faker';
+import logger from '../utils/logger.js';
 
-dotenv.config();
+dotenv.config({ quiet: true });
 
 fal.config({
   credentials: process.env.FAL_KEY
@@ -23,20 +24,19 @@ export const generateRewardImage = async ({ imageUrl, userDisplayName }) => {
         logs: true,
         onQueueUpdate: (update) => {
           if (update.status === 'IN_PROGRESS') {
-            update.logs.map((log) => log.message).forEach(console.log);
+            update.logs.map((log) => log.message).forEach(logger.info);
           }
         }
       }
     );
 
     // return generated image URL
-    //console.log("URL imagine generată:", result.data.images[0].url);
     return result.data.images[0].url;
 
 
 
   } catch (error) {
-    console.error('Error generating reward image:', error);
+    logger.error('Error generating reward image:', error);
     throw new Error('Failed to generate reward image');
   }
 };
