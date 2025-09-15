@@ -31,6 +31,10 @@ This repository hosts the quiz engine (backend) for the BrainBuzz bot.
     - `SUPABASE_URL`: The URL of the Supabase instance used to store quiz data. 
       You can get this URL from the Supabase Dashboard > Connect > App Frameworks > Framework: refine, Using: Supabase-js.
     - `SUPABASE_KEY`: Is obtained in the same way as `SUPABASE_URL`.
+    - `FAL_KEY`: The API key for fal.ai (image generation service).
+    - `NODE_ENV`: `dev` to enable some console logs for debugging, `prod` for production.
+    - `API_KEY`: The API key that requests made to the server must include in order to gain access. This is a simple security measure to prevent unauthorized access.
+    - `PORT`: Port number for the server to listen on (recommended 3001).
     - Paste the keys as they are, without any quotation marks (format example `OLLAMA_URL=http://localhost:9999`).
 
 5. Start the Express server
