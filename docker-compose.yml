@@ -1,6 +1,6 @@
 services:
   quiz-engine:
-    image: ghcr.io/raulariton/brainbuzz-quiz-engine:latest
+    image: brainbuzz-quiz-engine:dev
     env_file:
       - .env.docker
     ports:
