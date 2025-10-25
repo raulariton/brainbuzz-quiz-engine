@@ -1,4 +1,3 @@
-import axios from 'axios'; //pentru ollama
 import quizTypes from '../quizTypes.js';
 import { getActiveQuiz, storeQuiz } from '../services/dbServices.js';
 import { generateQuiz } from '../services/quizServices.js';
@@ -9,15 +8,13 @@ ACCEPTED_QUIZ_TYPES.push('computer_trivia');
 
 export class QuizController {
   static async handleQuizRequest(req, res) {
-    const type = req.query.type;
+    const type = req.query.type; // e.g. 'opentdb.10'
     const duration = Number(req.query.duration) || 15; // default 15 seconds
 
     if (!type) return res.status(400).json({ error: 'Missing quiz type' });
 
-    if (!ACCEPTED_QUIZ_TYPES.includes(type)) {
-      return res.status(400).json({ error: 'Invalid quiz type' });
-    }
-
+    // check if there is already an active quiz of this type
+    // if yes, return it
     const active = await getActiveQuiz(type, duration);
     if (active) {
       return res.json({

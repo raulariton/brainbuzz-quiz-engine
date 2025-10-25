@@ -4,18 +4,13 @@ import moment from 'moment';
 import logger from '../utils/logger.js';
 
 export async function generateQuiz(type) {
-  // get the prompt from the type
-  let prompt = quizTypes[type].prompt;
+  // if type matches regex opentdb.\d+
+  if (/^opentdb\.\d+/.test(type)) {
 
-  // if the type is 'historical',
-  // replace the {{currentDate}} placeholder with the current date
-  if (type === 'historical') {
-    const currentDate = new Date().toISOString().split('T')[0];
-    prompt = prompt.replace('{{currentDate}}', currentDate);
-  }
+    // extract the number after the dot
+    const categoryIndex = type.split('.')[1];
 
-  if (type === 'computer_trivia') {
-    const quiz = await getTriviaQuiz(type);
+    const quiz = await getTriviaQuiz(categoryIndex);
 
     if (!quiz) {
       logger.error('Failed to generate trivia quiz');
@@ -27,6 +22,16 @@ export async function generateQuiz(type) {
       options: quiz.options,
       answer: quiz.answer
     };
+  }
+
+  // get the prompt from the type
+  let prompt = quizTypes[type].prompt;
+
+  // if the type is 'historical',
+  // replace the {{currentDate}} placeholder with the current date
+  if (type === 'historical') {
+    const currentDate = new Date().toISOString().split('T')[0];
+    prompt = prompt.replace('{{currentDate}}', currentDate);
   }
 
   let validResponse = false;
@@ -213,18 +218,13 @@ async function getWikimediaEvent(date) {
   }
 }
 
-async function getTriviaQuiz(quizType) {
-
-  const typeMap = {
-    'computer_trivia': 18,
-  }
-
+async function getTriviaQuiz(categoryIndex) {
   try {
     const response = await axios.get(
       `https://opentdb.com/api.php`,{
         params: {
           amount: 1,
-          category: typeMap[quizType],
+          category: categoryIndex,
           difficulty: 'easy',
           type: 'multiple',
           encode: 'url3986'

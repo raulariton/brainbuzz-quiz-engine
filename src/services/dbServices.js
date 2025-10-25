@@ -144,3 +144,22 @@ export const getQuizCorrectCompletions = async (quiz_id) => {
     throw new Error('Failed to get quiz completions.');
   }
 }
+
+export const getQuizTypes = async (lang) => {
+  try {
+    const { data, error } = await supabaseClient
+      .from('quiz_types')
+      .select('key, value')
+      .eq('lang', lang);
+
+    if (error) {
+      throw new Error(error.message);
+    }
+
+    return data;
+
+  } catch (error) {
+    logger.error('Error getting quiz types from DB: ', error);
+    throw new Error(error);
+  }
+}
