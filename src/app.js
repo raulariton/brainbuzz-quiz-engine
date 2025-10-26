@@ -14,6 +14,10 @@ const port = process.env.PORT
 
 app.use(express.json());
 
+app.use('/ping', (req, res) => {
+  res.status(200).send('pong');
+});
+
 // use api key authentication middleware for all routes
 app.use(authenticateApiKey);
 
