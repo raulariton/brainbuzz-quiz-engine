@@ -34,7 +34,7 @@ import logger from '../utils/logger.js';
 export class ResultsController {
   /**
    * Given the completions of a quiz, return the 3 users who completed the quiz first
-   * and correctly, along with AI images for each winner
+   * and correctly
    */
   static async handleResults(req, res) {
     /** @type {RequestBody} */
@@ -77,6 +77,7 @@ export class ResultsController {
         const profilePicture = user.user_data?.profile_picture_url || null;
         const displayName = user.user_data?.display_name || '';
 
+        /* FEATURE DISABLED
         if (!profilePicture || !displayName) {
           logger.warn(`Cannot generate reward image of user with ID ${user.user_id} without profile picture and display name.`);
           return {
@@ -84,7 +85,13 @@ export class ResultsController {
             rewardImage: null,
           };
         }
+         */
 
+        user.rewardImage = null;
+
+        return user;
+
+        /* FEATURE DISABLED
         try {
           user.rewardImage = await generateMockImage({
             imageUrl: profilePicture,
@@ -101,6 +108,7 @@ export class ResultsController {
             rewardImage: null
           };
         }
+         */
       }));
     const otherUsersWithPlacement = otherUsers.map((user, index) => ({
       ...user,
